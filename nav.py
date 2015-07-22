@@ -48,8 +48,8 @@ mainPane = ResultsPane(mainPaneWin)
 while 1:
 	if switchTab == True:
 		switchTab = False	
-		mainPane.clear()
-		resultsPane.clear()
+		mainPane.reset()
+		resultsPane.reset()
 		if inTab == "Main Menu":
 			inputBox.hide()	
 			mainPane.setResults(["Main Menu page", "This has not been implemented yet."])
@@ -64,7 +64,7 @@ while 1:
 			inputBox.unhide()
 		elif inTab == "Help":
 			inputBox.hide()
-			mainPane.setResults(["Help page", "This has not been implemented yet.", "Note: for testing purposes you can enter 'quit' into a texbox."])
+			mainPane.setResults(["Help page", "This has not been implemented yet.", "Note: for testing purposes you can enter 'quit' into a texbox.", "The Query/Search results print your input plus 1-100."])
 			mainPane.showResults(mainPane.getPageNum())
 
 	# Be ready to capture a mouse click
@@ -79,14 +79,17 @@ while 1:
 			# Get whatever the user enters into the textbox
 			input = inputBox.edit()
 			input = input.strip()
-			resultsPane.clear()
 			# quit if they typed 'quit', otherwise, display input
 			if input == "quit":
 				break
 			else:
+				resultsPane.reset()
 				list = [input]
+				for i in range(1, 101):
+					list.append(str(i))
 				resultsPane.setResults(list)
 				resultsPane.showResults(resultsPane.getPageNum())
+	
 				# Make the textbox clear when next clicked on
 				inputBox.clear()
 		# if the click in the tab bar at the top of the screen
@@ -96,8 +99,13 @@ while 1:
 			if newTab and newTab != inTab:
 				inTab = newTab
 				switchTab = True	
-
-
+		# if the click is at the bottom of the screen (prev/next)
+		elif y == curses.LINES - 1 and (inTab == "Query" or inTab == "Search"):
+			if resultsPane.atNext(x):
+				resultsPane.showResults(resultsPane.getPageNum() + 1)
+			elif resultsPane.atPrev(x):
+				resultsPane.showResults(resultsPane.getPageNum() - 1)
+	
 # Make sure to clean up whatever window mode we may have gotten into
 curses.echo()
 curses.curs_set(1)
