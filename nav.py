@@ -3,6 +3,7 @@ import curses.textpad as textpad
 from tabbar import TabBar
 from resultspane import ResultsPane
 from inputbox import InputBox
+from menu import Menu
 
 # Initialize the standard screen
 scr = curses.initscr()
@@ -58,6 +59,8 @@ while 1:
 			inputBox.hide()
 			mainPane.setResults(["Tables page", "This has not been implemented yet."])	
 			mainPane.showResults(mainPane.getPageNum())
+			menu = Menu(6, 0, 10, 15, ["abc", "way too long for this", "third"], 1)
+			menu.selectItem("abc")
 		elif inTab == "Query":
 			inputBox.unhide()
 		elif inTab == "Search":
@@ -105,7 +108,8 @@ while 1:
 				resultsPane.showResults(resultsPane.getPageNum() + 1)
 			elif resultsPane.atPrev(x):
 				resultsPane.showResults(resultsPane.getPageNum() - 1)
-	
+		elif inTab == "Tables" and menu.itemAt(y, x):
+			menu.selectOnlyItem(menu.itemAt(y, x))
 # Make sure to clean up whatever window mode we may have gotten into
 curses.echo()
 curses.curs_set(1)
