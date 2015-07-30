@@ -6,33 +6,41 @@ import curses
 # The menu is verticle. If there are too many items, up (and down) arrows will
 # be displayed.
 class Menu():
-	def __init__(self, y, x, lines, cols, itemNames=[], cpNumSel=0, cpNumDeSel=0):
+	def __init__(self, y, x, lines, cols, itemNames=[], sideBar=False, cpNumSel=0, cpNumDeSel=0):
 		self.win = curses.newwin(lines, cols, y, x)
-		self.win.border(" ", "|", " ", " ", " ", "|", " ", "|")
 		self.parY = y
 		self.parX = x
 		(self.lines, self.cols) = self.win.getmaxyx()
 		self.selectColor = cpNumSel
 		self.deSelectColor = cpNumDeSel
-		self.itemOffset = {}
-		self.itemName = itemNames
-		offset = 0
-		for name in self.itemName:
-			self.itemOffset[name] = offset
-			#self.tabName.append(name)
-			self.win.addstr(offset, 0, self.displayedName(name))
-			offset += 1
-		self.win.refresh()
+		self.border = sideBar
+		self.setItems(itemNames)
 	
 	def displayedName(self, name):
 		if len(name) + 3 > self.cols:
 			return "[" + name[:self.cols - 6] + "..." + "]"
 		else:
 			return "[" + name + "]"
-	'''
+
 	def setItems(self, itemNames):
-		
-'''
+		self.itemOffset = {}
+		self.itemName = itemNames
+		offset = 0
+		for name in self.itemName:
+			self.itemOffset[name] = offset
+			self.win.addstr(offset, 0, self.displayedName(name))
+			offset += 1
+		self.win.refresh()
+
+	def unhide(self):
+		if (self.border):
+			self.win.border(" ", "|", " ", " ", " ", "|", " ", "|")
+		self.setItems(self.itemName)
+
+	def hide(self):
+		self.win.clear();
+		self.win.refresh()
+	
 	def selectItem(self, itemName):
 		self.win.addstr(self.itemOffset[itemName], 0, self.displayedName(itemName), curses.color_pair(self.selectColor))
 		self.win.refresh()

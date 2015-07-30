@@ -11,8 +11,10 @@ scr.refresh()
 
 # Start up color, then create color pair 1 and 2 (0 is resevered) for tabs
 curses.start_color()
-curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_GREEN)
+SELECTED_COLOR = 1
+DESELECTED_TAB_COLOR = 2
+curses.init_pair(SELECTED_COLOR, curses.COLOR_GREEN, curses.COLOR_BLACK)
+curses.init_pair(DESELECTED_TAB_COLOR, curses.COLOR_BLACK, curses.COLOR_GREEN)
 
 # Various setting changes
 curses.noecho() # So typed letters are not echoed to the screen
@@ -23,14 +25,24 @@ curses.curs_set(0) # makes cursor invisible
 curses.mousemask(1) # needed to capture mouse click events
 
 # Create the tabs at the top of the screen
-tabs = TabBar(["Main Menu", "Tables", "Query", "Search", "Help"], 1, 2)
+tabs = TabBar(["Main Menu", "Tables", "Query", "Search", "Help"], SELECTED_COLOR, DESELECTED_TAB_COLOR)
 inTab = "Main Menu"
 switchTab = True
 
+# Create main menu
+mainMenuNames = [" Connect to Database ", " Help ", " Quit "]
+mainMenu = Menu(3, curses.COLS/4, 6, curses.COLS, mainMenuNames, False, SELECTED_COLOR)
+
+# Create Tables menu
+tableNames = ["abc", "way too long for this", "third"]
+tableMenu = Menu(6, 0, 10, 15, tableNames, True, SELECTED_COLOR)
+tableMenu.hide()
+	
 # Create textBox for edit-able input
 inputY = 2
 inputPrompt = "\n   Enter Query: \n(ctr-g to submit)"
-inputBox = InputBox(inputPrompt, inputY, 0, 3)
+max_lines = curses.LINES - 10
+inputBox = InputBox(inputPrompt, inputY, 0, max_lines)
 (y, inputX) = inputBox.getboxyx()
 
 # Create pane for displaying results based on input	
@@ -51,16 +63,18 @@ while 1:
 		switchTab = False	
 		mainPane.reset()
 		resultsPane.reset()
+		mainMenu.hide()
+		tableMenu.hide()
+		inputBox.hide()		
 		if inTab == "Main Menu":
-			inputBox.hide()	
-			mainPane.setResults(["Main Menu page", "This has not been implemented yet."])
-			mainPane.showResults(mainPane.getPageNum())
+			mainMenu.unhide()	
+			mainMenu.selectItem(mainMenuNames[0])
 		elif inTab == "Tables":
-			inputBox.hide()
 			mainPane.setResults(["Tables page", "This has not been implemented yet."])	
+			
 			mainPane.showResults(mainPane.getPageNum())
-			menu = Menu(6, 0, 10, 15, ["abc", "way too long for this", "third"], 1)
-			menu.selectItem("abc")
+			tableMenu.unhide()
+			tableMenu.selectItem(tableNames[0])
 		elif inTab == "Query":
 			inputBox.unhide()
 		elif inTab == "Search":
@@ -108,8 +122,11 @@ while 1:
 				resultsPane.showResults(resultsPane.getPageNum() + 1)
 			elif resultsPane.atPrev(x):
 				resultsPane.showResults(resultsPane.getPageNum() - 1)
-		elif inTab == "Tables" and menu.itemAt(y, x):
-			menu.selectOnlyItem(menu.itemAt(y, x))
+		elif inTab == "Tables" and tableMenu.itemAt(y, x):
+			tableMenu.selectOnlyItem(tableMenu.itemAt(y, x))
+		elif inTab == "Main Menu" and mainMenu.itemAt(y, x):
+			mainMenu.selectOnlyItem(mainMenu.itemAt(y, x))
+
 # Make sure to clean up whatever window mode we may have gotten into
 curses.echo()
 curses.curs_set(1)
