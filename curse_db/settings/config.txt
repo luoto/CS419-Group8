@@ -1,1 +1,1 @@
-dbname='test' user='test_user' host='localhost' password='test'
+host='45.55.19.163' port=3306 user='anderleo' password='helloworld' dbname='testDB'  
