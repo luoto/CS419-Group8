@@ -20,12 +20,12 @@ class InputBox():
 		self.areaWin.refresh()
 		
 		(newY, newX) = self.areaWin.getyx()
-		self.x = newX
+		self.x = x + newX
 		self.y = y
 		self.h = minLines + 2
 		self.maxh = maxLines + 2
 		if cols == -1:
-			self.w = curses.COLS - newX
+			self.w = curses.COLS - x - newX
 		else:
 			self.w = cols + 2
 		
@@ -38,11 +38,12 @@ class InputBox():
 		self.outerBox.refresh()
 
 	def edit(self):
+		curses.curs_set(1)
 		self.outerBox = curses.newwin(self.maxh, self.w, self.y, self.x)
 		self.outerBox.border("|","|","-","-"," "," "," "," ")
 		self.outerBox.refresh()
 		innerBox = curses.newwin(self.maxh - 2, self.w - 2, self.y + 1, self.x + 1)
-		self.textbox = textpad.Textbox(innerBox)
+		self.textbox = textpad.Textbox(innerBox, insert_mode=True)
 		return self.textbox.edit()
 
 	def getmaxyx(self):
