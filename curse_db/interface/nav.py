@@ -4,7 +4,7 @@ from tabbar import TabBar
 from resultspane import ResultsPane
 from inputbox import InputBox
 from menu import Menu
-
+from connectscreen import mainMenuNav, mainMenuClick, hide
 # Initialize the standard screen
 scr = curses.initscr()
 scr.refresh()
@@ -23,19 +23,57 @@ scr.nodelay(1) # makes scr.getch() non-blocking
 scr.keypad(1) # assigns special characters (such as curses.KEY_LEFT)
 curses.curs_set(0) # makes cursor invisible
 curses.mousemask(1) # needed to capture mouse click events
-
+'''
 # For navigating the Main Menu (returns True if 'Quit' was pressed)
 def mainMenuNav(mainMenu, x, y):
 	itemName = mainMenu.itemAt(y, x)
-	mainMenu.selectOnlyItem(itemName)
+	if itemName:
+		mainMenu.selectOnlyItem(itemName)
 	return itemName
-
+'''
 # Wait to capture a mouse click
 def mouseClick():
 	curses.curs_set(0)
 	ch = scr.getch()
 	return ch == curses.KEY_MOUSE
+'''
+# For a click on the Main Menu page, returns "quit", "connected", "failedConnect", or None
+def mainMenuClick(x, y, mainMenuNav, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newConnect):
+	itemName = mainMenuNav(mainMenu, x, y) 
+	if itemName == mainMenuNames[0]:
+		prevDatabasesMenu.unhide()
+		for i in range(0, 5): 
+			databaseInputBoxes[i].unhide()
+		prevConnect.unhide()
+		newConnect.unhide()
+	elif itemName == mainMenuNames[2]:
+		return "quit"
+	elif prevConnect.itemAt(y, x):
+		hide(databaseInputBoxes)
+		hide([prevDatabasesMenu, prevConnect, newConnect])
+		return "connected"
+	elif newConnect.itemAt(y, x):
+		inputVals = ["","","","",""]
+		numValid = 0	
+		for i in range(0, 5):
+			inputVals[i] = databaseInputBoxes[i].clear()
+			if len(inputVals[i]) > 0:
+				numValid += 1
+		if numValid == 5:
+			return "connected"
+		else:
+			return "failedConnect"
+	elif x > databaseInputBoxesX: 
+		for i in range(4, -1, -1):
+			if y > databaseInputBoxesY[i]:
+				databaseInputBoxes[i].edit()
+				break
+	return None
 
+def hide(list):
+	for item in list:
+		item.hide()
+'''
 # Create main menu
 mainMenuNames = [" Connect to Database ", " Help ", " Quit "]
 mainMenuY = 4
@@ -72,27 +110,16 @@ quit = False
 while not connected:
 	if mouseClick():
 		(id, x, y, z, s) = curses.getmouse()
-		itemName = mainMenuNav(mainMenu, x, y) 
-		if itemName == mainMenuNames[0]:
-			prevDatabasesMenu.unhide()
-			for i in range(0, 5): 
-				databaseInputBoxes[i].unhide()
-			prevConnect.unhide()
-			newConnect.unhide()
-		elif itemName == mainMenuNames[2]:
+		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newConnect)
+		if response == "quit":
 			quit = True
 			break
-		elif prevConnect.itemAt(y, x):
+		elif response == "connected":
 			connected = True
-		elif newConnect.itemAt(y, x):
-			connected = True
-		elif x > databaseInputBoxesX: 
-			for i in range(4, -1, -1):
-				if y > databaseInputBoxesY[i]:
-					databaseInputBoxes[i].edit()
-					break
-				
-		
+		elif response == "failedConnect":
+			scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Must provide all 5 fields.")
+			scr.refresh()
+
 # Create the full set of tabs at the top of the screen
 tabs = TabBar(["Main Menu", "Tables", "Query", "Search", "Help"], SELECTED_COLOR, DESELECTED_TAB_COLOR)
 inTab = "Main Menu"
@@ -126,11 +153,12 @@ mainPane = ResultsPane(mainPaneWin)
 while not quit:
 	if switchTab == True:
 		switchTab = False	
+		scr.clear()
+		scr.refresh()
+		tabs.selectOnlyTab(inTab)
 		mainPane.reset()
 		resultsPane.reset()
-		mainMenu.hide()
-		tableMenu.hide()
-		inputBox.hide()		
+		hide([mainMenu, tableMenu, inputBox])		
 		if inTab == "Main Menu":
 			mainMenu.unhide()
 		elif inTab == "Tables":
@@ -150,7 +178,31 @@ while not quit:
 	# Be ready to capture a mouse click
 	if mouseClick():
 		(id, x, y, z, s) = curses.getmouse()
-		# if the click was in the (visible) input box
+		
+		# if the click in the tab bar at the top of the screen
+		if y == 0:
+			# select the tab at the x-position of the click
+			newTab = tabs.selectTabAt(x)
+			if newTab and newTab != inTab:
+				inTab = newTab
+				switchTab = True
+			
+		# Click anywhere on Main Menu page
+		elif inTab == "Main Menu":
+			response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newConnect)
+			if response == "quit":
+				quit = True
+			elif response == "failedConnect":
+				scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Must provide all 5 fields.")
+				scr.refresh()
+			elif response == "connected":
+				switchTab = True # Cleans up screen
+		
+		# Click in Tables menu
+		elif inTab == "Tables" and tableMenu.itemAt(y, x):
+			tableMenu.selectOnlyItem(tableMenu.itemAt(y, x))
+		
+		# if the click was in the Query or Search input box
 		if not inputBox.isHidden() and (y >= inputY and  y <= inputYmax and x >= inputX):
 			# Get whatever the user enters into the textbox
 			input = inputBox.edit()
@@ -166,25 +218,13 @@ while not quit:
 			
 			# Make the textbox clear when next clicked on
 			inputBox.clear()
-		
-		# if the click in the tab bar at the top of the screen
-		elif y == 0:
-			# select the tab at the x-position of the click
-			newTab = tabs.selectTabAt(x)
-			if newTab and newTab != inTab:
-				inTab = newTab
-				switchTab = True	
-		# if the click is at the bottom of the screen (prev/next)
+
+		# If the click is at the bottom of the Query or Seach screen 
 		elif y == curses.LINES - 1 and (inTab == "Query" or inTab == "Search"):
 			if resultsPane.atNext(x):
 				resultsPane.showResults(resultsPane.getPageNum() + 1)
 			elif resultsPane.atPrev(x):
 				resultsPane.showResults(resultsPane.getPageNum() - 1)
-		elif inTab == "Tables" and tableMenu.itemAt(y, x):
-			tableMenu.selectOnlyItem(tableMenu.itemAt(y, x))
-		elif inTab == "Main Menu" and mainMenu.itemAt(y, x):
-			if mainMenuNav(mainMenu, x, y) == mainMenuNames[2]:
-				quit = True
 
 # Make sure to clean up whatever window mode we may have gotten into
 curses.echo()

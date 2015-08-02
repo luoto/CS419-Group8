@@ -31,7 +31,8 @@ class InputBox():
 		
 		self.innerBox = curses.newwin(self.h - 2, self.w - 2, self.y + 1, self.x + 1)
 		self.makeSmall()	
-	
+		self.textbox = None
+
 	def makeSmall(self):
 		self.outerBox = curses.newwin(self.h, self.w, self.y, self.x)
 		self.outerBox.border("|","|","-","-"," "," "," "," ")
@@ -54,11 +55,15 @@ class InputBox():
 		return (self.y, self.x) 
 	
 	def clear(self):
+		str = ""
+		if self.textbox:
+			str = self.textbox.gather()
 		self.innerBox.clear()
 		self.innerBox.refresh()
 		self.outerBox.border(" "," "," "," "," "," "," "," ")
 		self.outerBox.refresh()
 		self.makeSmall()
+		return str
 	
 	def hide(self):
 		self.hidden = True
