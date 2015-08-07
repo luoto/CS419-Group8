@@ -1,6 +1,8 @@
 import psycopg2
 import pymysql
 
+# TODO: Implement methods for the Mysql class
+
 class DB:
     """Generic class that is meant to be used as an interface for subclasses.
 
@@ -25,16 +27,88 @@ class Psql(DB):
     """
     def __init__(self):
         DB.__init__(self)
+        self.connection = None
+        self.cursor = None
 
-    def connect(self):
-        connection_string = self._read('config.txt')
-        print connection_string
+
+    def connect(self, connection_string):
+        """Establishes a connection to the database provided by the user
+
+        Returns:
+            A boolean, True if a connection has been successfully made, otherwise
+            will return false
+        """
+        # connection_string = self._read('config.txt')
         try:
-            conn = psycopg2.connect(connection_string)
-            curr = conn.cursor()
-            return curr
+            self.connection = psycopg2.connect(connection_string)
+            self.cursor = self.connection.cursor()
+            return True
         except psycopg2.Error, e:
+            return False
             print e
+
+
+    def getTables(self):
+        """Returns tables to the user in the form of a list of strings"""
+        results = []
+
+        self.cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+
+        results = self.cursor.fetchall()
+        results = map(lambda result: result[0], results)
+        return results
+
+
+    def getTableInfo(self, table_name):
+        """ Returns column and datatype of that column """
+        results = []
+
+        self.cursor.execute("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '{}'".format(table_name))
+
+        results = self.cursor.fetchall()
+        results = map(lambda result: result[0] + "\t" + result[1], results)
+        return results
+
+
+    def search(self):
+        # get results for the table
+        pass
+
+
+    def executeQuery(self, query):
+        """ Executes query and returns the result in a list of strings.
+
+        Args:
+            query: The query string.
+
+        Returns:
+            A list of tuples corresponding to rows of data fetched from the
+            database.
+        """
+        results = []
+
+        def formatRow(row):
+            """Helper function to format each row"""
+            result = ""
+            first = True
+            for item in row:
+                if first == True:
+                    result += str(item)
+                    first = False
+                else:
+                    result += "\t" + str(item)
+            return result
+
+        self.cursor.execute(query)
+        results = self.cursor.fetchall()
+        results = map(formatRow, results)
+
+        return results
+
+
+    def closeConnection(self):
+        self.connection.close();
+        return True
 
 
 class Mysql(DB):
@@ -51,8 +125,19 @@ class Mysql(DB):
         curr = conn.cursor()
         return curr
 
+
 if __name__ == '__main__':
-    db = Mysql()
-    cursor = db.connect()
-    if cursor.execute("SHOW TABLES"):
-        print 'Connection Successful - Database live!'
+    # db = Mysql()
+    # cursor = db.connect()
+    # if cursor.execute("SHOW TABLES"):
+    #     print 'Connection Successful - Database live!'
+
+
+    # PostgreSQL
+    # Example use case
+    db = Psql()
+    db.connect()
+    # print db.getTables()
+    # print db.getTableInfo("movies")
+    # print db.executeQuery("SELECT * FROM movies")
+    db.closeConnection()
