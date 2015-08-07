@@ -1,1 +1,1 @@
-host='45.55.19.163' port=3306 user='anderleo' password='helloworld' dbname='testDB'  
+[{"connection_string": "dbname=curses host=localhost user=postgres password=helloworld", "nickname": "tony", "vendor": "Psql"}, {"vendor": "Psql", "connection_string": "dbname=curses host=localhost user=postgres password=password", "nickname": "harry"}]
