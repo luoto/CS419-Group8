@@ -1,10 +1,16 @@
+import sys
 import curses
 import curses.textpad as textpad
+# In current directory
 from tabbar import TabBar
 from resultspane import ResultsPane
 from inputbox import InputBox
 from menu import Menu
 from connectscreen import mainMenuNav, mainMenuClick, hide
+# In sibling utils directory
+sys.path.append('../utils')
+from utils import getNicknames
+
 # Initialize the standard screen
 scr = curses.initscr()
 scr.refresh()
@@ -23,64 +29,20 @@ scr.nodelay(1) # makes scr.getch() non-blocking
 scr.keypad(1) # assigns special characters (such as curses.KEY_LEFT)
 curses.curs_set(0) # makes cursor invisible
 curses.mousemask(1) # needed to capture mouse click events
-'''
-# For navigating the Main Menu (returns True if 'Quit' was pressed)
-def mainMenuNav(mainMenu, x, y):
-	itemName = mainMenu.itemAt(y, x)
-	if itemName:
-		mainMenu.selectOnlyItem(itemName)
-	return itemName
-'''
+
 # Wait to capture a mouse click
 def mouseClick():
 	curses.curs_set(0)
 	ch = scr.getch()
 	return ch == curses.KEY_MOUSE
-'''
-# For a click on the Main Menu page, returns "quit", "connected", "failedConnect", or None
-def mainMenuClick(x, y, mainMenuNav, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newConnect):
-	itemName = mainMenuNav(mainMenu, x, y) 
-	if itemName == mainMenuNames[0]:
-		prevDatabasesMenu.unhide()
-		for i in range(0, 5): 
-			databaseInputBoxes[i].unhide()
-		prevConnect.unhide()
-		newConnect.unhide()
-	elif itemName == mainMenuNames[2]:
-		return "quit"
-	elif prevConnect.itemAt(y, x):
-		hide(databaseInputBoxes)
-		hide([prevDatabasesMenu, prevConnect, newConnect])
-		return "connected"
-	elif newConnect.itemAt(y, x):
-		inputVals = ["","","","",""]
-		numValid = 0	
-		for i in range(0, 5):
-			inputVals[i] = databaseInputBoxes[i].clear()
-			if len(inputVals[i]) > 0:
-				numValid += 1
-		if numValid == 5:
-			return "connected"
-		else:
-			return "failedConnect"
-	elif x > databaseInputBoxesX: 
-		for i in range(4, -1, -1):
-			if y > databaseInputBoxesY[i]:
-				databaseInputBoxes[i].edit()
-				break
-	return None
 
-def hide(list):
-	for item in list:
-		item.hide()
-'''
 # Create main menu
 mainMenuNames = [" Connect to Database ", " Help ", " Quit "]
 mainMenuY = 4
 mainMenu = Menu(3, curses.COLS/4, mainMenuY, curses.COLS, mainMenuNames, False, SELECTED_COLOR)
 
 # Create menu for previously connected databases (then hide it)
-prevDatabaseNames = ["prevDB1", "prevDB2"]
+prevDatabaseNames = getNicknames()
 prevDatabasesMaxX = 20
 mainMenuY += 3
 prevDatabasesMenu = Menu(mainMenuY, 0, curses.LINES - 10, prevDatabasesMaxX, prevDatabaseNames, True, SELECTED_COLOR)
@@ -98,9 +60,11 @@ for i in range(0, 5):
 
 # Two connect buttons
 prevConnect = Menu(curses.LINES - 1, 3, 1, 12, ["connect"])
-newConnect = Menu(curses.LINES - 1, databaseInputBoxesX, 1, 12, ["connect"]) 
+newsqlConnect = Menu(curses.LINES - 1, databaseInputBoxesX, 1, 16, ["sql connect"]) 
+newpsqlConnect = Menu(curses.LINES - 1, databaseInputBoxesX + 20, 1, 17, ["psql connect"]) 
 prevConnect.hide()
-newConnect.hide()
+newsqlConnect.hide()
+newpsqlConnect.hide()
 
 # Just for before a database is connected to, only have Main Menu
 scr.addstr(0, 0, "Main Menu", curses.color_pair(SELECTED_COLOR))
@@ -110,15 +74,24 @@ quit = False
 while not connected:
 	if mouseClick():
 		(id, x, y, z, s) = curses.getmouse()
-		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newConnect)
+		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect)
 		if response == "quit":
 			quit = True
 			break
-		elif response == "connected":
-			connected = True
 		elif response == "failedConnect":
 			scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Must provide all 5 fields.")
 			scr.refresh()
+		elif response == "failedOldConnect":
+			scr.addstr(curses.LINES - 2, 0, "Select a database.")
+			scr.refresh()
+		elif isinstance(response, str):
+			# clear failed connect space
+			scr.addstr(curses.LINES - 2, 0, "                                                                           ");
+			scr.addstr(6, 0, response)
+			scr.refresh()
+		elif response:
+			db = response
+			connected = True
 
 # Create the full set of tabs at the top of the screen
 tabs = TabBar(["Main Menu", "Tables", "Query", "Search", "Help"], SELECTED_COLOR, DESELECTED_TAB_COLOR)
@@ -162,11 +135,14 @@ while not quit:
 		if inTab == "Main Menu":
 			mainMenu.unhide()
 		elif inTab == "Tables":
-			mainPane.setResults(["Tables page", "This has not been implemented yet."])	
+			mainPane.setResults(["Tables page", "This has not been implemented yet"])	
 			
 			mainPane.showResults(mainPane.getPageNum())
+			tableNames = db.getTables
+			tableMenu.setItems(tableNames)
 			tableMenu.unhide()
-			tableMenu.selectItem(tableNames[0])
+			if len(tableNames) > 0:
+				tableMenu.selectItem(tableNames[0])
 		elif inTab == "Query":
 			inputBox.unhide()
 		elif inTab == "Search":
@@ -189,15 +165,23 @@ while not quit:
 			
 		# Click anywhere on Main Menu page
 		elif inTab == "Main Menu":
-			response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newConnect)
+			response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect)
 			if response == "quit":
 				quit = True
 			elif response == "failedConnect":
 				scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Must provide all 5 fields.")
 				scr.refresh()
-			elif response == "connected":
-				switchTab = True # Cleans up screen
-		
+		elif response == "failedOldConnect":
+			scr.addstr(curses.LINES - 2, 0, "Select a database.")
+			scr.refresh()
+		elif isinstance(response, str):
+			# clear failed connect space
+			scr.addstr(curses.LINES - 2, 0, "                                                                           ");
+			scr.addstr(6, 0, response)
+			scr.refresh()
+		elif response:
+			db = response
+
 		# Click in Tables menu
 		elif inTab == "Tables" and tableMenu.itemAt(y, x):
 			tableMenu.selectOnlyItem(tableMenu.itemAt(y, x))
