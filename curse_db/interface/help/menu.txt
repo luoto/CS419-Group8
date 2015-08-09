@@ -1,1 +1,12 @@
-From menu.txt
+Help Topic:  Main Menu
+
+------------------------------------------
+       Option        -       Description
+
+ Connect to Database -   This choice will send you to the connections page where you will have the option to 
+ 					     establish a new database connection OR use a previously created connection.
+
+ Help				 -   Sends the user to this Help Guide.
+
+
+ Exit 				 -   Terminates the program.
