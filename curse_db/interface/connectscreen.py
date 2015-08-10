@@ -32,14 +32,14 @@ def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabas
 	elif itemName == mainMenuNames[1]: # help
 		hide(databaseInputBoxes)
 		hide([prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect])
-		return "Help: " + getHelp("main_menu")
+		return "Help: " + getHelp("menu")
 	elif itemName == mainMenuNames[2]:
 		return "quit"
 	elif prevConnect.itemAt(y, x):
 		if prevDatabasesMenu.getSelected():
 			hide(databaseInputBoxes)
-			hide([prevDatabasesMenu, prevConnect, newsqlConnect, newpsqulConnect])
-			return  useDB(prevDatabasesMenu.getSelected())
+			hide([prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect])
+			return useDB(prevDatabasesMenu.getSelected())
 		else:
 			return "failedOldConnect"
 	elif newsqlConnect.itemAt(y, x):

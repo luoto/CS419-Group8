@@ -41,7 +41,6 @@ class Menu():
 	def hide(self):
 		self.win.clear();
 		self.win.refresh()
-		self.selected = None
 	
 	def selectItem(self, itemName):
 		self.win.addstr(self.itemOffset[itemName], 0, self.displayedName(itemName), curses.color_pair(self.selectColor))

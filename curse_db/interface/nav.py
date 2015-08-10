@@ -73,7 +73,8 @@ connected = False
 quit = False
 while not connected:
 	if mouseClick():
-		(id, x, y, z, s) = curses.getmouse()
+		
+		(mid, x, y, z, s) = curses.getmouse()
 		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect)
 		if response == "quit":
 			quit = True
@@ -99,8 +100,8 @@ inTab = "Main Menu"
 switchTab = True
 
 # Create Tables menu
-tableNames = ["abc", "way too long for this", "third"]
-tableMenu = Menu(6, 0, 10, 15, tableNames, True, SELECTED_COLOR)
+tableNames = db.getTables()
+tableMenu = Menu(3, 0, curses.LINES - 3, 15, tableNames, True, SELECTED_COLOR)
 tableMenu.hide()
 	
 # Create textBox for edit-able input
@@ -119,7 +120,7 @@ resultsWin = curses.newwin(h, w, paneYwithInput, 0)
 resultsPane = ResultsPane(resultsWin)
 
 # Create pane for non-input pages
-mainPaneWin = curses.newwin(curses.LINES - 2, curses.COLS, inputY, 0)
+mainPaneWin = curses.newwin(curses.LINES - 3, curses.COLS - 16, 3, 16)
 mainPane = ResultsPane(mainPaneWin)
 
 # Main loop, program ends when 'quit' is entered in the textbox
@@ -135,14 +136,14 @@ while not quit:
 		if inTab == "Main Menu":
 			mainMenu.unhide()
 		elif inTab == "Tables":
-			mainPane.setResults(["Tables page", "This has not been implemented yet"])	
-			
-			mainPane.showResults(mainPane.getPageNum())
-			tableNames = db.getTables
-			tableMenu.setItems(tableNames)
+			tableNames = db.getTables()
+ 			tableMenu.setItems(tableNames)
 			tableMenu.unhide()
 			if len(tableNames) > 0:
 				tableMenu.selectItem(tableNames[0])
+				mainPane.setResults(db.getTableInfo(tableMenu.getSelected()))	
+				mainPane.showResults(mainPane.getPageNum())
+				
 		elif inTab == "Query":
 			inputBox.unhide()
 		elif inTab == "Search":
@@ -153,7 +154,7 @@ while not quit:
 
 	# Be ready to capture a mouse click
 	if mouseClick():
-		(id, x, y, z, s) = curses.getmouse()
+		(mid, x, y, z, s) = curses.getmouse()
 		
 		# if the click in the tab bar at the top of the screen
 		if y == 0:
@@ -181,7 +182,8 @@ while not quit:
 			scr.refresh()
 		elif response:
 			db = response
-
+			connected = True
+		
 		# Click in Tables menu
 		elif inTab == "Tables" and tableMenu.itemAt(y, x):
 			tableMenu.selectOnlyItem(tableMenu.itemAt(y, x))
@@ -189,15 +191,14 @@ while not quit:
 		# if the click was in the Query or Search input box
 		if not inputBox.isHidden() and (y >= inputY and  y <= inputYmax and x >= inputX):
 			# Get whatever the user enters into the textbox
-			input = inputBox.edit()
-			input = input.strip()
+			queryInput = inputBox.edit()
+			queryInput = queryInput.strip()
 			
 			#Display "results"
 			resultsPane.reset()
-			list = [input]
-			for i in range(1, 101):
-				list.append(str(i))
-			resultsPane.setResults(list)
+			queryResults = db.executeQuery(queryInput)
+
+			resultsPane.setResults(queryResults)
 			resultsPane.showResults(resultsPane.getPageNum())
 			
 			# Make the textbox clear when next clicked on
@@ -211,7 +212,7 @@ while not quit:
 				resultsPane.showResults(resultsPane.getPageNum() - 1)
 
 # Make sure to clean up whatever window mode we may have gotten into
-curses.echo()
-curses.curs_set(1)
+curses.echo(True)
+curses.curs_set(True)
 curses.endwin()
 
