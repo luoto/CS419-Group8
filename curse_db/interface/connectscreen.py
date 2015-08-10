@@ -15,7 +15,7 @@ def mainMenuNav(mainMenu, x, y):
 	return itemName
 
 # For a click on the Main Menu page, returns "quit", "connected", "failedConnect", or None
-def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect):
+def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect, helpWin):
 	itemName = mainMenuNav(mainMenu, x, y) 
 	(temp, databaseInputBoxesX) = databaseInputBoxes[0].getboxyx()
 	databaseInputBoxesY = []
@@ -23,6 +23,8 @@ def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabas
 		(inputY, temp) = databaseInputBoxes[i].getboxyx()
 		databaseInputBoxesY.append(inputY)
 	if itemName == mainMenuNames[0]:
+		helpWin.clear()
+		helpWin.refresh()
 		prevDatabasesMenu.unhide();
 		for i in range(0, 5): 
 			databaseInputBoxes[i].unhide()
@@ -30,9 +32,12 @@ def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabas
 		newsqlConnect.unhide()
 		newpsqlConnect.unhide()
 	elif itemName == mainMenuNames[1]: # help
+		helpWin.clear()
+		helpWin.refresh()
 		hide(databaseInputBoxes)
 		hide([prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect])
-		return "Help: " + getHelp("menu")
+		helpWin.addstr(0, 0, getHelp("menu"))
+		helpWin.refresh()
 	elif itemName == mainMenuNames[2]:
 		return "quit"
 	elif prevConnect.itemAt(y, x):
@@ -70,7 +75,7 @@ def connectVia(vender, dataInputBoxes):
 	inputVals = ["","","","",""]
 	numValid = 0	
 	for i in range(0, 5):
-		inputVals[i] = databaseInputBoxes[i].clear()
+		inputVals[i] = dataInputBoxes[i].clear()
 		if inputVals[i] != "":
 			numValid += 1
 	if numValid == 5:

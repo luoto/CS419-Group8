@@ -9,7 +9,7 @@ from menu import Menu
 from connectscreen import mainMenuNav, mainMenuClick, hide
 # In sibling utils directory
 sys.path.append('../utils')
-from utils import getNicknames
+from utils import getNicknames, getHelp
 
 # Initialize the standard screen
 scr = curses.initscr()
@@ -38,13 +38,16 @@ def mouseClick():
 
 # Create main menu
 mainMenuNames = [" Connect to Database ", " Help ", " Quit "]
-mainMenuY = 4
-mainMenu = Menu(3, curses.COLS/4, mainMenuY, curses.COLS, mainMenuNames, False, SELECTED_COLOR)
+mainMenuY = 2
+mainMenu = Menu(mainMenuY, curses.COLS/4, len(mainMenuNames), curses.COLS, mainMenuNames, False, SELECTED_COLOR)
+
+# Create window to use to clear everything but the tab bar area
+helpWin = curses.newwin(curses.LINES - mainMenuY + 3, curses.COLS, mainMenuY + 3, 0)
 
 # Create menu for previously connected databases (then hide it)
 prevDatabaseNames = getNicknames()
 prevDatabasesMaxX = 20
-mainMenuY += 3
+mainMenuY += 4
 prevDatabasesMenu = Menu(mainMenuY, 0, curses.LINES - 10, prevDatabasesMaxX, prevDatabaseNames, True, SELECTED_COLOR)
 prevDatabasesMenu.hide()
 
@@ -73,9 +76,10 @@ connected = False
 quit = False
 while not connected:
 	if mouseClick():
-		
+	#	clearWin.clear()
+	#	clearWin.refresh()	
 		(mid, x, y, z, s) = curses.getmouse()
-		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect)
+		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect, helpWin)
 		if response == "quit":
 			quit = True
 			break
@@ -100,9 +104,10 @@ inTab = "Main Menu"
 switchTab = True
 
 # Create Tables menu
-tableNames = db.getTables()
-tableMenu = Menu(3, 0, curses.LINES - 3, 15, tableNames, True, SELECTED_COLOR)
-tableMenu.hide()
+if (connected):
+	tableNames = db.getTables()
+	tableMenu = Menu(3, 0, curses.LINES - 3, 15, tableNames, True, SELECTED_COLOR)
+	tableMenu.hide()
 	
 # Create textBox for edit-able input
 inputY = 2
@@ -149,8 +154,8 @@ while not quit:
 		elif inTab == "Search":
 			inputBox.unhide()
 		elif inTab == "Help":
-			mainPane.setResults(["Help page", "This has not been implemented yet.", "Go to Main Menu and click 'Quit' to quit.", "The Query/Search results print your input plus 1-100."])
-			mainPane.showResults(mainPane.getPageNum())
+			helpWin.addstr(0, 0, getHelp("menu"))
+			helpWin.refresh()
 
 	# Be ready to capture a mouse click
 	if mouseClick():
@@ -166,23 +171,23 @@ while not quit:
 			
 		# Click anywhere on Main Menu page
 		elif inTab == "Main Menu":
-			response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect)
+			response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect, helpWin)
 			if response == "quit":
 				quit = True
 			elif response == "failedConnect":
 				scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Must provide all 5 fields.")
 				scr.refresh()
-		elif response == "failedOldConnect":
-			scr.addstr(curses.LINES - 2, 0, "Select a database.")
-			scr.refresh()
-		elif isinstance(response, str):
-			# clear failed connect space
-			scr.addstr(curses.LINES - 2, 0, "                                                                           ");
-			scr.addstr(6, 0, response)
-			scr.refresh()
-		elif response:
-			db = response
-			connected = True
+			elif response == "failedOldConnect":
+				scr.addstr(curses.LINES - 2, 0, "Select a database.")
+				scr.refresh()
+			elif isinstance(response, str):
+				# clear failed connect space
+				scr.addstr(curses.LINES - 2, 0, "                                                                           ");
+				scr.addstr(6, 0, response)
+				scr.refresh()
+			elif response:
+				db = response
+				connected = True
 		
 		# Click in Tables menu
 		elif inTab == "Tables" and tableMenu.itemAt(y, x):
