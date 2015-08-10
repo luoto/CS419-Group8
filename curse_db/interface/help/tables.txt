@@ -1,1 +1,11 @@
 Help Topic:  Tables
+------------------------------------------
+ Lefthand Pane - Table Name Menu:
+	
+	On the left side of the screen in the Tables tab is a list of all table names (surrounded by []) in the database you are connected to.  You can click on the names to see the details about that table's fields.
+
+ Righthand Pane - Table Description:
+
+	On the right side of the screen in the Tables tab is the details of the selected table on the left (the selected one is shown in green).  The table details are given in the format:
+	
+	<field name>  <type>

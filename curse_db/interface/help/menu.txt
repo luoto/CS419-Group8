@@ -1,12 +1,14 @@
 Help Topic:  Main Menu
-
 ------------------------------------------
-       Option        -       Description
+       Option           -       Description
 
- Connect to Database -   This choice will send you to the connections page where you will have the option to 
- 					     establish a new database connection OR use a previously created connection.
+ Connect to Database	-	This choice will bring up the connections page where you will have the option to:
 
- Help				 -   Sends the user to this Help Guide.
+ 1. Use a previously created connection
+	Select a name from the list on the left then hit [connect] to connect.
+ 2. Establish a new database connection
+	Fill in each of the field by clicking on each (pressing Enter before clicking on anything else), then click either [sql connect] for a sql database or [psql connect] if it is a prosgresql database. The connection infomation will also be saved, and the nickname is use for the previously created connections menu.
 
+ Help		        -   Brings up this Help Guide.
 
- Exit 				 -   Terminates the program.
+ Quit 	 		-   Terminates the program.

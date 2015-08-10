@@ -1,1 +1,6 @@
 Help Topic: Search
+------------------------------------------
+	The Search tab is similar to the Query tab.  Click in the search textbox to enter a search for a filed name.  It is a multi-line box, so you will need to press ctr-g to submit your query.  
+
+	The results will be displayed, one per line, in the space below.  If there are more results than will fit on the screen, a [Next->] button will appear in the bottom right-hand corner of the screen (once pressed, it will take you to the next screen's worth of results and a [<-Prev] button will appear in the bottom left-hand corner of the screen.
+
