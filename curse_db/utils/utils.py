@@ -12,9 +12,9 @@ def useDB(nickname):
     connections = loadDBInfo()
     connection_string = map(lambda connection: connection["connection_string"],filter(lambda connection: connection["nickname"] == nickname, connections))[0]
 
-    connection_string
-    db = connect.Psql()
-    db.connect(connection_string)
+    #db = connect.Psql()
+    #db.connect(connection_string)
+    db = connect.Mysql()
     return db
 
 
@@ -119,5 +119,6 @@ if __name__ == '__main__':
 
     # Example
     myDB = useDB('david')
-    print myDB.getTables()
-    print myDB.executeQuery("SHOW TABLES;")
+    cursor = myDB.connect()
+    myDB.executeQuery("CREATE TABLE newTable10( name VARCHAR(200), age INT);", cursor)
+    print myDB.getTables(cursor)
