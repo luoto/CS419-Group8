@@ -118,6 +118,6 @@ if __name__ == '__main__':
     #getNicknames()
 
     # Example
-    myDB = useDB('tony')
+    myDB = useDB('david')
     print myDB.getTables()
-    print myDB.executeQuery("SELECT * FROM movies")
+    print myDB.executeQuery("SHOW TABLES;")
