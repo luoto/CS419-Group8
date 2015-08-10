@@ -51,6 +51,10 @@ class Menu():
 		self.win.addstr(self.itemOffset[itemName], 0, self.displayedName(itemName), curses.color_pair(self.deSelectColor))
 		self.win.refresh()
 
+	def deSelectAll(self):
+		for item in self.itemName:
+			self.deSelectItem(item)
+	
 	def selectOnlyItem(self, itemName):
 		for name in self.itemName:
 			if name == itemName:

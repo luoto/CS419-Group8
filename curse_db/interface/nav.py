@@ -128,6 +128,17 @@ resultsPane = ResultsPane(resultsWin)
 mainPaneWin = curses.newwin(curses.LINES - 3, curses.COLS - 16, 3, 16)
 mainPane = ResultsPane(mainPaneWin)
 
+# Create buttons for Help tab
+helpOptions = ["menu", "tables", "query", "search"]
+helpTab = helpOptions[0]
+helpButtons = []
+offset = 0
+for i in range(0, len(helpOptions)):
+	helpButtons.append(Menu(2, offset, 1, 10, [helpOptions[i]], False, SELECTED_COLOR))
+	helpButtons[i].hide()
+	offset += len(helpOptions[i]) + 3
+helpButtons[0].selectItem(helpTab)
+
 # Main loop, program ends when 'quit' is entered in the textbox
 while not quit:
 	if switchTab == True:
@@ -154,7 +165,10 @@ while not quit:
 		elif inTab == "Search":
 			inputBox.unhide()
 		elif inTab == "Help":
-			helpWin.addstr(0, 0, getHelp("menu"))
+			for b in helpButtons:
+				b.unhide()	
+				b.selectOnlyItem(helpTab)
+			helpWin.addstr(0, 0, getHelp(helpTab))
 			helpWin.refresh()
 
 	# Be ready to capture a mouse click
@@ -215,6 +229,12 @@ while not quit:
 				resultsPane.showResults(resultsPane.getPageNum() + 1)
 			elif resultsPane.atPrev(x):
 				resultsPane.showResults(resultsPane.getPageNum() - 1)
+		elif inTab == "Help":
+			for b in helpButtons:
+				if b.itemAt(y, x):
+					helpTab = b.itemAt(y, x)
+					switchTab = True
+		
 
 # Make sure to clean up whatever window mode we may have gotten into
 curses.echo(True)
