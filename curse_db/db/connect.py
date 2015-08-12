@@ -124,7 +124,7 @@ class Mysql(DB):
         self.conn = None
         self.cursor = None
 
-    def connect(self):#connection_string
+    def connect(self, connection_string):#connection_string
         #connection_string = self._read('config.txt')
         #self.conn = pymysql.connect(host='45.55.19.163', port=3306, user='anderleo', password='helloworld', db='testDB')
         self.conn = pymysql.connect(connection_string)
