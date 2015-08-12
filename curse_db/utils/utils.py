@@ -42,17 +42,15 @@ def loadDBInfo():
     return json.loads(connections)
 
 
-def deleteDBInfo(index):
-    # Needs to be refactored - do not use
+def deleteDBInfo(nickname):
     connections = loadDBInfo()
-    connections.pop(index)
-    print(connections)
-
+    # find index of nickname
+    connections = filter(lambda connection: connection["nickname"] != nickname, connections)
     f = open("../settings/config.txt", "w")
-    for connection in connections:
-        f.write(connection)
+    f.write(json.dumps(connections))
     f.close
 
+    return True
 
 def updateDBInfo(index, connection):
     pass
@@ -151,5 +149,7 @@ if __name__ == '__main__':
 
     # myDB = useDB("tony")
     # print myDB.executeQuery("SELECT * FROM movies WHERE title = 'Deadpool'")
-    saveDBInfo("George", "test", "localhost", "3000", "admin", "123", "Psql")
-    print loadDBInfo()
+    # saveDBInfo("George", "test", "localhost", "3000", "admin", "123", "Psql")
+    # print loadDBInfo()
+
+    deleteDBInfo('tony')
