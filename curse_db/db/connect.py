@@ -192,19 +192,32 @@ if __name__ == '__main__':
     #for x in results:
     #     print x
     #
-    # #Test of executeQuery()
-    #query = "INSERT INTO cars (name) VALUES ('Camero');"
+    # #Test of executeQuery() - CREATE TABLE
+    #query = "CREATE TABLE FavoriteHeroes(name VARCHAR(200), age INT);"
     #querySuccess = db.executeQuery(query, cursor, conn)
     #print querySuccess
-
-    #query = "SELECT * FROM cars;"
+    #
+    # #Test of executeQuery() - INSERT
+    #query = "INSERT INTO FavoriteHeroes (name) VALUES('Spiderman');"
     #querySuccess = db.executeQuery(query, cursor, conn)
     #print querySuccess
-    field = "name"
-    table_name = "cars"
-    string = "Ca"
-    querySuccess = db.search(cursor, table_name, field, string)
-    print querySuccess
+    #
+    # #Test of executeQuery() - UPDATE
+    #query = "UPDATE FavoriteHeroes SET age=50 WHERE name='Spiderman';"
+    #querySuccess = db.executeQuery(query, cursor, conn)
+    #print querySuccess
+    #
+    # #Test of executeQuery() - SELECT *
+    #query = "SELECT * FROM heroes;"
+    #querySuccess = db.executeQuery(query, cursor, conn)
+    #print querySuccess
+    #
+    # Test of Search()
+    #field = "name"
+    #table_name = "cars"
+    #string = "Ca"
+    #querySuccess = db.search(cursor, table_name, field, string)
+    #print querySuccess
 
     # PostgreSQL
     # Example use case
