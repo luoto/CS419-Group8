@@ -161,4 +161,5 @@ if __name__ == '__main__':
     # print loadDBInfo()
 
     # # deleteDBInfo('tony')
-    print useDB('david')
+    myDB = useDB('david')
+    print myDB.executeQuery("SELECT * FROM cars")
