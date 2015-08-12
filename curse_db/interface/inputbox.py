@@ -54,10 +54,14 @@ class InputBox():
 	def getboxyx(self):
 		return (self.y, self.x) 
 	
-	def clear(self):
-		str = ""
+	def gather(self):
 		if self.textbox:
 			str = self.textbox.gather()
+			str = str.strip()
+			return str
+	
+	def clear(self):
+		str = self.gather()
 		self.innerBox.clear()
 		self.innerBox.refresh()
 		self.outerBox.border(" "," "," "," "," "," "," "," ")

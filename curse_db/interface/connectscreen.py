@@ -5,7 +5,7 @@ from inputbox import InputBox
 from menu import Menu
 import sys
 sys.path.append('../utils')
-from utils import useDB, getHelp, saveDBInfo
+from utils import useDB, getHelp, saveDBInfo, deleteDBInfo
 
 # For navigating the Main Menu menu, selects clicked item and returns its name
 def mainMenuNav(mainMenu, x, y):
@@ -48,20 +48,21 @@ def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabas
 		else:
 			return "failedOldConnect"
 	elif newsqlConnect.itemAt(y, x):
-		return connectVia("sql", databaseInputBoxes)
+		if connectVia("sql", databaseInputBoxes):
+			db = useDB(databaseInputBoxes[4].gather())
+			if db is not None:
+				return db			
+			else:
+				deleteDBInfo(databaseInputBoxes[4].gather())
+		return "failedConnect"	
 	elif newpsqlConnect.itemAt(y, x):
-		inputVals = ["","","","",""]
-		numValid = 0	
-		for i in range(0, 5):
-			inputVals[i] = databaseInputBoxes[i].clear()
-			if inputVals[i] != "":
-				numValid += 1
-		if numValid == 5:
-			# nickname, db, host, port, user, password, vender
-			saveDBInfo(inputVals[4], inputVals[2], inputVals[3], 51232, inputVals[0], inputVals[1], "Psql")
-			return useDB(inputVals[4])
-		else:
-			return "failedConnect"
+		if connectVia("Psql", databaseInputBoxes):
+			db = useDB(databaseInputBoxes[4].gather())
+			if db is not None:
+				return db			
+			else:
+				deleteDBInfo(databaseInputBoxes[4].gather())
+		return "failedConnect"	
 	elif prevDatabasesMenu.itemAt(y, x):
 		prevDatabasesMenu.selectOnlyItem(prevDatabasesMenu.itemAt(y, x))
 	elif x > databaseInputBoxesX: 
@@ -75,15 +76,14 @@ def connectVia(vender, dataInputBoxes):
 	inputVals = ["","","","",""]
 	numValid = 0	
 	for i in range(0, 5):
-		inputVals[i] = dataInputBoxes[i].clear()
+		inputVals[i] = dataInputBoxes[i].gather()
 		if inputVals[i] != "":
 			numValid += 1
 	if numValid == 5:
 		# nickname, db, host, port, user, password, vender
-		saveDBInfo(inputVals[4], inputVals[2], inputVals[3], 51232, inputVals[0], inputVals[1], vender)
-		return "connected"
-	else:
-		return "failedConnect"
+		if saveDBInfo(inputVals[4], inputVals[2], inputVals[3], 51232, inputVals[0], inputVals[1], vender):
+			return True
+	return False
 
 # Calls hide() on each item in the list
 def hide(list):

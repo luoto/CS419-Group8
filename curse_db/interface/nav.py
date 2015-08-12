@@ -48,7 +48,7 @@ helpWin = curses.newwin(curses.LINES - mainMenuY + 3, curses.COLS, mainMenuY + 3
 prevDatabaseNames = getNicknames()
 prevDatabasesMaxX = 20
 mainMenuY += 4
-prevDatabasesMenu = Menu(mainMenuY, 0, curses.LINES - 10, prevDatabasesMaxX, prevDatabaseNames, True, SELECTED_COLOR)
+prevDatabasesMenu = Menu(mainMenuY, 0, curses.LINES - 9, prevDatabasesMaxX, prevDatabaseNames, True, SELECTED_COLOR)
 prevDatabasesMenu.hide()
 
 # Create input boxes
@@ -76,15 +76,13 @@ connected = False
 quit = False
 while not connected:
 	if mouseClick():
-	#	clearWin.clear()
-	#	clearWin.refresh()	
 		(mid, x, y, z, s) = curses.getmouse()
 		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect, helpWin)
 		if response == "quit":
 			quit = True
 			break
 		elif response == "failedConnect":
-			scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Must provide all 5 fields.")
+			scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Make sure all 5 fields are valid.")
 			scr.refresh()
 		elif response == "failedOldConnect":
 			scr.addstr(curses.LINES - 2, 0, "Select a database.")
@@ -99,12 +97,12 @@ while not connected:
 			connected = True
 
 # Create the full set of tabs at the top of the screen
-tabs = TabBar(["Main Menu", "Tables", "Query", "Search", "Help"], SELECTED_COLOR, DESELECTED_TAB_COLOR)
+tabs = TabBar(["Main Menu", "Tables", "Query", "Help"], SELECTED_COLOR, DESELECTED_TAB_COLOR)
 inTab = "Main Menu"
 switchTab = True
 
 # Create Tables menu
-if (connected):
+if connected:
 	tableNames = db.getTables()
 	tableMenu = Menu(3, 0, curses.LINES - 3, 15, tableNames, True, SELECTED_COLOR)
 	tableMenu.hide()
@@ -129,7 +127,7 @@ mainPaneWin = curses.newwin(curses.LINES - 3, curses.COLS - 16, 3, 16)
 mainPane = ResultsPane(mainPaneWin)
 
 # Create buttons for Help tab
-helpOptions = ["menu", "tables", "query", "search"]
+helpOptions = ["menu", "tables", "query"]
 helpTab = helpOptions[0]
 helpButtons = []
 offset = 0
@@ -211,13 +209,14 @@ while not quit:
 		if not inputBox.isHidden() and (y >= inputY and  y <= inputYmax and x >= inputX):
 			# Get whatever the user enters into the textbox
 			queryInput = inputBox.edit()
-			queryInput = queryInput.strip()
 			
 			#Display "results"
 			resultsPane.reset()
 			queryResults = db.executeQuery(queryInput)
-
-			resultsPane.setResults(queryResults)
+			if queryResults != False:
+				resultsPane.setResults(queryResults)
+			else:
+				resultsPane.setResults(["Error in query"])
 			resultsPane.showResults(resultsPane.getPageNum())
 			
 			# Make the textbox clear when next clicked on
