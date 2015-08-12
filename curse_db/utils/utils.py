@@ -28,6 +28,7 @@ def getNicknames():
     connections = loadDBInfo();
     return map(lambda connection: connection["nickname"], connections)
 
+
 def loadDBInfo():
     """ Returns a list of available connections
 
@@ -147,3 +148,8 @@ if __name__ == '__main__':
     # print saveDBInfo('joe', '1', '1', '1', '1', '1', 'MelonSql')
     # print saveDBInfo('joe', '1', '1', '1', '1', '1', 'Psql')
     # print saveDBInfo("tony", 1, 1, 1, 1, 1, "Psql")
+
+    # myDB = useDB("tony")
+    # print myDB.executeQuery("SELECT * FROM movies WHERE title = 'Deadpool'")
+    saveDBInfo("George", "test", "localhost", "3000", "admin", "123", "Psql")
+    print loadDBInfo()

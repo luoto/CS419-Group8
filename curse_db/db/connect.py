@@ -31,7 +31,7 @@ class Psql(DB):
         self.cursor = None
 
 
-    def connect(self, connection_string): 
+    def connect(self, connection_string):
         """Establishes a connection to the database provided by the user
 
         Returns:
@@ -99,7 +99,11 @@ class Psql(DB):
                     result += "\t" + str(item)
             return result
 
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except:
+            return False
+
         results = self.cursor.fetchall()
         results = map(formatRow, results)
 
@@ -155,32 +159,32 @@ class Mysql(DB):
         return results
 
 if __name__ == '__main__':
-    db = Mysql()
-    cursor = db.connect()
-
-    #Test of getTables()
-    results = db.getTables(cursor)
-    for x in results:
-        print x    
-
-    #Test of getTableInfo()
-    table_name = results[0]
-    results = db.getTableInfo(table_name)
-    for x in results:
-        print x
-
-    #Test of executeQuery()
-    query = "CREATE TABLE newTable( name VARCHAR(200), age INT);"
-    querySuccess = executeQuery(query, cursor)
-    results = db.getTableInfo("newTable")
-    for x in results:
-        print x
+    # db = Mysql()
+    # cursor = db.connect()
+    #
+    # #Test of getTables()
+    # results = db.getTables(cursor)
+    # for x in results:
+    #     print x
+    #
+    # #Test of getTableInfo()
+    # table_name = results[0]
+    # results = db.getTableInfo(table_name)
+    # for x in results:
+    #     print x
+    #
+    # #Test of executeQuery()
+    # query = "CREATE TABLE newTable( name VARCHAR(200), age INT);"
+    # querySuccess = executeQuery(query, cursor)
+    # results = db.getTableInfo("newTable")
+    # for x in results:
+    #     print x
 
     # PostgreSQL
     # Example use case
-    #db = Psql()
-    #result = db.connect()
-    #print db.getTables()
-    #print db.getTableInfo("movies")
-    #print db.executeQuery("SELECT * FROM movies")
-    #db.closeConnection()
+    # db = Psql()
+    # result = db.connect("dbname=curses host=localhost user=postgres password=helloworld")
+    # print db.getTables()
+    # print db.getTableInfo("movies")
+    # print db.executeQuery("SELECT sdgsdkkee sdf")
+    # db.closeConnection()
