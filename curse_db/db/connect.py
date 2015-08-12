@@ -126,8 +126,8 @@ class Mysql(DB):
 
     def connect(self):#connection_string
         #connection_string = self._read('config.txt')
-        self.conn = pymysql.connect(host='45.55.19.163', port=3306, user='anderleo', password='helloworld', db='testDB')
-        #self.conn = pymysql.connect(connection_string)
+        #self.conn = pymysql.connect(host='45.55.19.163', port=3306, user='anderleo', password='helloworld', db='testDB')
+        self.conn = pymysql.connect(connection_string)
         self.cursor = self.conn.cursor()
 
     def getTables(self):
@@ -174,7 +174,7 @@ class Mysql(DB):
 
 if __name__ == '__main__':
     db = Mysql()
-    db.connect()     #--|___ Formly cursor = db.connect(), I had to split these two up
+    db.connect(connection_string)     #--|___ Formly cursor = db.connect(), I had to split these two up
     #cursor = db.cursor(conn)#--|    so that I could use both the cursor and the conn (commits)
     #                               in global calls
     # #Test of getTables()
@@ -183,10 +183,10 @@ if __name__ == '__main__':
     #    print x
     #
     # #Test of getTableInfo()
-    #table_name = "heroes"
-    #results = db.getTableInfo(table_name)
-    #for x in results:
-    #     print x
+    table_name = "heroes"
+    results = db.getTableInfo(table_name)
+    for x in results:
+         print x
     #
     # #Test of executeQuery() - CREATE TABLE
     #query = "CREATE TABLE FavoriteHeroes(name VARCHAR(200), age INT);"
