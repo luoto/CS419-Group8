@@ -58,6 +58,9 @@ def updateDBInfo(index, connection):
 def saveDBInfo(nickname, dbname, host, port, user, password, vendor):
     """ Saves connection to the connection file as a JSON object"""
 
+    if vendor != "Psql" or vendor != "Mysql":
+        return False
+
     connection_string = "dbname={} host={} user={} password={}".format(dbname, host, user, password)
 
     connection = {"nickname": nickname, "connection_string": connection_string, "vendor": vendor}
