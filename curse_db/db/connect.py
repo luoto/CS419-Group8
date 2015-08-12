@@ -161,10 +161,10 @@ class Mysql(DB):
         conn.commit()
         return results
 
-    def search(self, cursor, table, string):
+    def search(self, cursor, table, field, string):
         # get results for the table
         results = []
-        query = "SELECT * FROM " + table + " WHERE name LIKE '%" + string + "%'"
+        query = "SELECT * FROM " + table + " WHERE " + field + " LIKE '%" + string + "%'"
 
         cursor.execute(query)
         results = cursor.fetchall()
@@ -188,7 +188,6 @@ if __name__ == '__main__':
     #    print x
     #
     # #Test of getTableInfo()
-    table_name = "cars"
     #results = db.getTableInfo(table_name)
     #for x in results:
     #     print x
@@ -201,8 +200,10 @@ if __name__ == '__main__':
     #query = "SELECT * FROM cars;"
     #querySuccess = db.executeQuery(query, cursor, conn)
     #print querySuccess
-
-    querySuccess = db.search(cursor, "cars", "Ca")
+    field = "name"
+    table_name = "cars"
+    string = "Ca"
+    querySuccess = db.search(cursor, table_name, field, string)
     print querySuccess
 
     # PostgreSQL
