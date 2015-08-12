@@ -10,11 +10,14 @@ import connect
 def useDB(nickname):
     """ Establishes and returns connection to a database with the nickname provided"""
     connections = loadDBInfo()
-    connection_string = map(lambda connection: connection["connection_string"],filter(lambda connection: connection["nickname"] == nickname, connections))[0]
+    vendor, connection_string = map(lambda connection: (connection["vendor"], connection["connection_string"]),filter(lambda connection: connection["nickname"] == nickname, connections))[0]
 
-    #db = connect.Psql()
-    #db.connect(connection_string)
-    db = connect.Mysql()
+    if vendor == "Psql":
+        db = connect.Psql()
+        db.connect(connection_string)
+    elif vendor == "Mysql":
+        db = connect.Mysql()
+
     return db
 
 
@@ -117,8 +120,11 @@ if __name__ == '__main__':
     #saveDBInfo("tony", "curses", "localhost", 51232, "postgres", "password", "Psql")
     #getNicknames()
 
+    # myDB = useDB("tony")
+    # print myDB.getTables()
+
     # Example
-    myDB = useDB('david')
-    cursor = myDB.connect()
-    myDB.executeQuery("CREATE TABLE newTable10( name VARCHAR(200), age INT);", cursor)
-    print myDB.getTables(cursor)
+    # myDB = useDB('david')
+    # cursor = myDB.connect()
+    # myDB.executeQuery("CREATE TABLE newTable10( name VARCHAR(200), age INT);", cursor)
+    # print myDB.getTables(cursor)
