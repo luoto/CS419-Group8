@@ -13,7 +13,7 @@ def useDB(nickname):
     vendor, connection_string = map(lambda connection: (connection["vendor"], connection["connection_string"]),filter(lambda connection: connection["nickname"] == nickname, connections))[0]
 
     if vendor == "Psql":
-        db = connect.Psql()
+        db = Psql()
         db.connect(connection_string)
     elif vendor == "Mysql":
         db = Mysql()
