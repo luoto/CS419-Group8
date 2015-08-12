@@ -125,6 +125,10 @@ class Mysql(DB):
     def connect(self):
         #connection_string = self._read('config.txt')
         conn = pymysql.connect(host='45.55.19.163', port=3306, user='anderleo', password='helloworld', db='testDB')
+        #curr = conn.cursor()
+        return conn
+
+    def cursor(self,conn):
         curr = conn.cursor()
         return curr
 
@@ -148,37 +152,54 @@ class Mysql(DB):
         results = map(lambda result: result[0] + "\t" + result[1], results)
         return results
 
-    def executeQuery(self, query, cursor):
+    def executeQuery(self, query, cursor, conn):
         """ Executes query and returns the result in a list of strings."""
         results = []
 
         cursor.execute(query)
-
         results = cursor.fetchall()
-        results = map(lambda result: result[0] + "\t" + result[1], results)
+        conn.commit()
         return results
 
+    def search(self, cursor, table, string):
+        # get results for the table
+        results = []
+        query = "SELECT * FROM " + table + " WHERE "
+
+        cursor.execute(query)
+        pass
+
+    def closeConnection(self, connection):
+        connection.close();
+        return True
+
+    def commit(self):
+        conn.commit()
+
 if __name__ == '__main__':
-    # db = Mysql()
-    # cursor = db.connect()
-    #
+    db = Mysql()
+    conn = db.connect()     #--|___ Formly cursor = db.connect(), I had to split these two up
+    cursor = db.cursor(conn)#--|    so that I could use both the cursor and the conn (commits)
+    #                               in global calls
     # #Test of getTables()
-    # results = db.getTables(cursor)
-    # for x in results:
-    #     print x
+    #results = db.getTables(cursor)
+    #for x in results:
+    #    print x
     #
     # #Test of getTableInfo()
-    # table_name = results[0]
-    # results = db.getTableInfo(table_name)
-    # for x in results:
+    table_name = "cars"
+    #results = db.getTableInfo(table_name)
+    #for x in results:
     #     print x
     #
     # #Test of executeQuery()
-    # query = "CREATE TABLE newTable( name VARCHAR(200), age INT);"
-    # querySuccess = executeQuery(query, cursor)
-    # results = db.getTableInfo("newTable")
-    # for x in results:
-    #     print x
+    query = "INSERT INTO cars (name) VALUES ('Camero');"
+    querySuccess = db.executeQuery(query, cursor, conn)
+    print querySuccess
+
+    query = "SELECT * FROM cars;"
+    querySuccess = db.executeQuery(query, cursor, conn)
+    print querySuccess
 
     # PostgreSQL
     # Example use case
@@ -188,3 +209,4 @@ if __name__ == '__main__':
     # print db.getTableInfo("movies")
     # print db.executeQuery("SELECT sdgsdkkee sdf")
     # db.closeConnection()
+    db.closeConnection(cursor)
