@@ -127,8 +127,17 @@ class Mysql(DB):
     def connect(self, connection_string):#connection_string
         #connection_string = self._read('config.txt')
         #self.conn = pymysql.connect(host='45.55.19.163', port=3306, user='anderleo', password='helloworld', db='testDB')
-        self.conn = pymysql.connect(connection_string)
-        self.cursor = self.conn.cursor()
+        hostn = connection_string[0][5:len(connection_string[0])]
+        port = connection_string[1][5:len(connection_string[1])]
+        usern = connection_string[2][5:len(connection_string[2])]
+        passw = connection_string[3][9:len(connection_string[3])]
+        dbn = connection_string[4][3:len(connection_string[4])]
+
+        print hostn + ' ' + port + ' ' + usern + ' ' + passw + ' ' + dbn
+        portno = int(port)
+        print type(portno)
+        self.conn = pymysql.connect(host=hostn, port=portno, user=usern, password=passw, db=dbn)
+        #self.cursor = self.conn.cursor()
 
     def getTables(self):
         """Returns tables to the user in the form of a list of strings"""

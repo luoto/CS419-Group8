@@ -9,6 +9,7 @@ def useDB(nickname):
 
     # check if exist
     if nickname not in getNicknames():
+        print 'Not in nicknames...'
         return False
 
     vendor, connection_string = map(lambda connection: (connection["vendor"], connection["connection_string"]),filter(lambda connection: connection["nickname"] == nickname, connections))[0]
@@ -19,6 +20,7 @@ def useDB(nickname):
             return None
     elif vendor == "Mysql":
         db = connect.Mysql()
+        connection_string = arrayify(connection_string)
         if db.connect(connection_string) is False:
             return None
     else:
@@ -111,7 +113,9 @@ def arrayify(query_string):
     Returns:
         A list of words from the query_string.
     """
-    query_array = query_string.strip().split()
+    query_array = query_string.strip().split(' ,')
+    query_array = query_string.strip().split(',')
+    query_array = map(lambda item: item.strip(), query_array)
     return query_array
 
 
@@ -157,4 +161,4 @@ if __name__ == '__main__':
     # print loadDBInfo()
 
     # # deleteDBInfo('tony')
-    print useDB('tony')
+    print useDB('david')
