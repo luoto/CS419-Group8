@@ -164,10 +164,11 @@ class Mysql(DB):
     def search(self, cursor, table, string):
         # get results for the table
         results = []
-        query = "SELECT * FROM " + table + " WHERE "
+        query = "SELECT * FROM " + table + " WHERE name LIKE '%" + string + "%'"
 
         cursor.execute(query)
-        pass
+        results = cursor.fetchall()
+        return results
 
     def closeConnection(self, connection):
         connection.close();
@@ -193,12 +194,15 @@ if __name__ == '__main__':
     #     print x
     #
     # #Test of executeQuery()
-    query = "INSERT INTO cars (name) VALUES ('Camero');"
-    querySuccess = db.executeQuery(query, cursor, conn)
-    print querySuccess
+    #query = "INSERT INTO cars (name) VALUES ('Camero');"
+    #querySuccess = db.executeQuery(query, cursor, conn)
+    #print querySuccess
 
-    query = "SELECT * FROM cars;"
-    querySuccess = db.executeQuery(query, cursor, conn)
+    #query = "SELECT * FROM cars;"
+    #querySuccess = db.executeQuery(query, cursor, conn)
+    #print querySuccess
+
+    querySuccess = db.search(cursor, "cars", "Ca")
     print querySuccess
 
     # PostgreSQL
