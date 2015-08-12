@@ -121,24 +121,22 @@ class Mysql(DB):
     """
     def __init__(self):
         DB.__init__(self)
+        self.conn = None
+        self.cursor = None
 
-    def connect(self):
+    def connect(self):#connection_string
         #connection_string = self._read('config.txt')
-        conn = pymysql.connect(host='45.55.19.163', port=3306, user='anderleo', password='helloworld', db='testDB')
-        #curr = conn.cursor()
-        return conn
+        #self.conn = pymysql.connect(host='45.55.19.163', port=3306, user='anderleo', password='helloworld', db='testDB')
+        self.conn = pymysql.connect(connection_string)
+        self.cursor = self.conn.cursor()
 
-    def cursor(self,conn):
-        curr = conn.cursor()
-        return curr
-
-    def getTables(self, cursor):
+    def getTables(self):
         """Returns tables to the user in the form of a list of strings"""
 
         print 'Here are the MYSQL tables!!!'
         results = []
-        cursor.execute("SHOW TABLES;")
-        results = cursor.fetchall()
+        self.cursor.execute("SHOW TABLES;")
+        results = self.cursor.fetchall()
         results = map(lambda result: result[0], results)
         return results
 
@@ -146,65 +144,76 @@ class Mysql(DB):
         """ Returns column and datatype of that column """
         results = []
 
-        cursor.execute("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '{}'".format(table_name))
+        self.cursor.execute("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '{}'".format(table_name))
 
-        results = cursor.fetchall()
+        results = self.cursor.fetchall()
         results = map(lambda result: result[0] + "\t" + result[1], results)
         return results
 
-    def executeQuery(self, query, cursor, conn):
+    def executeQuery(self, query):
         """ Executes query and returns the result in a list of strings."""
         results = []
 
-        cursor.execute(query)
-        results = cursor.fetchall()
-        conn.commit()
+        self.cursor.execute(query)
+        results = self.cursor.fetchall()
+        self.conn.commit()
         return results
 
-    def search(self, cursor, table, field, string):
+    def search(self, table, field, string):
         # get results for the table
         results = []
         query = "SELECT * FROM " + table + " WHERE " + field + " LIKE '%" + string + "%'"
 
-        cursor.execute(query)
-        results = cursor.fetchall()
+        self.cursor.execute(query)
+        results = self.cursor.fetchall()
         return results
 
-    def closeConnection(self, connection):
-        connection.close();
+    def closeConnection(self):
+        self.conn.close();
         return True
-
-    def commit(self):
-        conn.commit()
 
 if __name__ == '__main__':
     db = Mysql()
-    conn = db.connect()     #--|___ Formly cursor = db.connect(), I had to split these two up
-    cursor = db.cursor(conn)#--|    so that I could use both the cursor and the conn (commits)
+    db.connect(connection_string)     #--|___ Formly cursor = db.connect(), I had to split these two up
+    #cursor = db.cursor(conn)#--|    so that I could use both the cursor and the conn (commits)
     #                               in global calls
     # #Test of getTables()
-    #results = db.getTables(cursor)
+    #results = db.getTables()
     #for x in results:
     #    print x
     #
     # #Test of getTableInfo()
-    #results = db.getTableInfo(table_name)
-    #for x in results:
-    #     print x
+    table_name = "heroes"
+    results = db.getTableInfo(table_name)
+    for x in results:
+         print x
     #
-    # #Test of executeQuery()
-    #query = "INSERT INTO cars (name) VALUES ('Camero');"
-    #querySuccess = db.executeQuery(query, cursor, conn)
+    # #Test of executeQuery() - CREATE TABLE
+    #query = "CREATE TABLE FavoriteHeroes(name VARCHAR(200), age INT);"
+    #querySuccess = db.executeQuery(query)
     #print querySuccess
-
-    #query = "SELECT * FROM cars;"
-    #querySuccess = db.executeQuery(query, cursor, conn)
+    #
+    # #Test of executeQuery() - INSERT
+    #query = "INSERT INTO FavoriteHeroes (name) VALUES('Spiderman');"
+    #querySuccess = db.executeQuery(query)
     #print querySuccess
-    field = "name"
-    table_name = "cars"
-    string = "Ca"
-    querySuccess = db.search(cursor, table_name, field, string)
-    print querySuccess
+    #
+    # #Test of executeQuery() - UPDATE
+    #query = "UPDATE FavoriteHeroes SET age=50 WHERE name='Spiderman';"
+    #querySuccess = db.executeQuery(query)
+    #print querySuccess
+    #
+    # #Test of executeQuery() - SELECT *
+    #query = "SELECT * FROM heroes;"
+    #querySuccess = db.executeQuery(query)
+    #print querySuccess
+    #
+    # Test of Search()
+    #field = "name"
+    #table_name = "cars"
+    #string = "Ca"
+    #querySuccess = db.search(cursor, table_name, field, string)
+    #print querySuccess
 
     # PostgreSQL
     # Example use case
@@ -214,4 +223,4 @@ if __name__ == '__main__':
     # print db.getTableInfo("movies")
     # print db.executeQuery("SELECT sdgsdkkee sdf")
     # db.closeConnection()
-    db.closeConnection(cursor)
+    db.closeConnection()
