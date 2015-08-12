@@ -22,7 +22,7 @@ def useDB(nickname):
 
 
 def getNicknames():
-    """ Returns stored nicnames in a list of strings """
+    """ Returns stored nicknames in a list of strings """
     connections = loadDBInfo();
     return map(lambda connection: connection["nickname"], connections)
 
@@ -58,8 +58,15 @@ def updateDBInfo(index, connection):
 def saveDBInfo(nickname, dbname, host, port, user, password, vendor):
     """ Saves connection to the connection file as a JSON object"""
 
-    if vendor != "Psql" or vendor != "Mysql":
+    # check for supported vendors
+    if vendor != "Psql" and vendor != "Mysql":
         return False
+
+    # check for duplicates nicknames
+    nicknames = getNicknames()
+    for name in nicknames:
+        if name == nickname:
+            return False
 
     connection_string = "dbname={} host={} user={} password={}".format(dbname, host, user, password)
 
@@ -131,3 +138,10 @@ if __name__ == '__main__':
     # cursor = myDB.connect()
     # myDB.executeQuery("CREATE TABLE newTable10( name VARCHAR(200), age INT);", cursor)
     # print myDB.getTables(cursor)
+
+
+    # TEST ERROR HANDLERS
+    # print saveDBInfo('tony', '1', '1', '1', '1', '1', 'Mysql')
+    # print saveDBInfo('joe', '1', '1', '1', '1', '1', 'MelonSql')
+    # print saveDBInfo('joe', '1', '1', '1', '1', '1', 'Psql')
+    # print saveDBInfo("tony", 1, 1, 1, 1, 1, "Psql")
