@@ -5,7 +5,7 @@ from inputbox import InputBox
 from menu import Menu
 import sys
 sys.path.append('../utils')
-from utils import useDB, getHelp, saveDBInfo, deleteDBInfo
+from utils import useDB, getHelp, saveDBInfo, deleteDBInfo, getNicknames
 
 # For navigating the Main Menu menu, selects clicked item and returns its name
 def mainMenuNav(mainMenu, x, y):
@@ -15,7 +15,7 @@ def mainMenuNav(mainMenu, x, y):
 	return itemName
 
 # For a click on the Main Menu page, returns "quit", "connected", "failedConnect", or None
-def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect, helpWin):
+def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, prevDelete, newsqlConnect, newpsqlConnect, helpWin):
 	itemName = mainMenuNav(mainMenu, x, y) 
 	(temp, databaseInputBoxesX) = databaseInputBoxes[0].getboxyx()
 	databaseInputBoxesY = []
@@ -29,6 +29,7 @@ def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabas
 		for i in range(0, 5): 
 			databaseInputBoxes[i].unhide()
 		prevConnect.unhide()
+		prevDelete.unhide()
 		newsqlConnect.unhide()
 		newpsqlConnect.unhide()
 	elif itemName == mainMenuNames[1]: # help
@@ -42,15 +43,27 @@ def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabas
 		return "quit"
 	elif prevConnect.itemAt(y, x):
 		if prevDatabasesMenu.getSelected():
-			hide(databaseInputBoxes)
-			hide([prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect])
-			return useDB(prevDatabasesMenu.getSelected())
-		else:
+			db = useDB(prevDatabasesMenu.getSelected())
+			if db is not None:
+				hide(databaseInputBoxes)
+				hide([prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect])
+				helpWin.clear()
+				helpWin.refresh()
+				return db
 			return "failedOldConnect"
+	elif prevDelete.itemAt(y, x):
+		if prevDatabasesMenu.getSelected() is not None:
+			deleteDBInfo(prevDatabasesMenu.getSelected())
+			prevDatabasesMenu.deSelectAll()
+			prevDatabasesMenu.setItems(getNicknames())
+			prevDatabasesMenu.hide()
+			prevDatabasesMenu.unhide()
 	elif newsqlConnect.itemAt(y, x):
 		if connectVia("sql", databaseInputBoxes):
 			db = useDB(databaseInputBoxes[4].gather())
 			if db is not None:
+				helpWin.clear()
+				helpWin.refresh()
 				return db			
 			else:
 				deleteDBInfo(databaseInputBoxes[4].gather())
@@ -59,6 +72,8 @@ def mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabas
 		if connectVia("Psql", databaseInputBoxes):
 			db = useDB(databaseInputBoxes[4].gather())
 			if db is not None:
+				helpWin.clear()
+				helpWin.refresh()
 				return db			
 			else:
 				deleteDBInfo(databaseInputBoxes[4].gather())
