@@ -3,20 +3,21 @@ import sys
 sys.path.append('../db')
 import connect
 
-# TODO: Write documentation for each of the functions
-# TODO: Ensure that all methods are working for MySQL
-# TODO: Increase function robustness by handling edge cases and errors
-
 def useDB(nickname):
     """ Establishes and returns connection to a database with the nickname provided"""
     connections = loadDBInfo()
+
+    # check if exist
+    if nickname not in getNicknames():
+        return False
+
     vendor, connection_string = map(lambda connection: (connection["vendor"], connection["connection_string"]),filter(lambda connection: connection["nickname"] == nickname, connections))[0]
 
     if vendor == "Psql":
-        db = Psql()
+        db = connect.Psql()
         db.connect(connection_string)
     elif vendor == "Mysql":
-        db = Mysql()
+        db = connect.Mysql()
         db.connect(connection_string)
     else:
         return False
@@ -153,4 +154,5 @@ if __name__ == '__main__':
     # saveDBInfo("George", "test", "localhost", "3000", "admin", "123", "Psql")
     # print loadDBInfo()
 
-    deleteDBInfo('tony')
+    # # deleteDBInfo('tony')
+    # print useDB('sdgsd')
