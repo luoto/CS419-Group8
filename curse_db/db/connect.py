@@ -135,8 +135,14 @@ class Mysql(DB):
 
         portno = int(port)
 
-        self.conn = pymysql.connect(host=hostn, port=portno, user=usern, password=passw, db=dbn)
-        self.cursor = self.conn.cursor()
+        try:
+            self.conn = pymysql.connect(host=hostn, port=portno, user=usern, password=passw, db=dbn)
+            self.cursor = self.conn.cursor()
+            return True
+        except:
+            return False
+
+        
 
     def getTables(self):
         """Returns tables to the user in the form of a list of strings"""
