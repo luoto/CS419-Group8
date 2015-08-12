@@ -61,11 +61,13 @@ for i in range(0, 5):
 	databaseInputBoxes.append(InputBox(inputPrompts[i], databaseInputBoxesY[i], databaseInputBoxesX, 1))
 	databaseInputBoxes[i].hide()
 
-# Two connect buttons
-prevConnect = Menu(curses.LINES - 1, 3, 1, 12, ["connect"])
+# Three connect buttons and a delete button for the previously save DBs
+prevConnect = Menu(curses.LINES - 1, 0, 1, 12, ["connect"])
+prevDelete = Menu(curses.LINES - 1, 10, 1, 12, ["delete"])
 newsqlConnect = Menu(curses.LINES - 1, databaseInputBoxesX, 1, 16, ["sql connect"]) 
 newpsqlConnect = Menu(curses.LINES - 1, databaseInputBoxesX + 20, 1, 17, ["psql connect"]) 
 prevConnect.hide()
+prevDelete.hide()
 newsqlConnect.hide()
 newpsqlConnect.hide()
 
@@ -77,7 +79,7 @@ quit = False
 while not connected:
 	if mouseClick():
 		(mid, x, y, z, s) = curses.getmouse()
-		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect, helpWin)
+		response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, prevDelete, newsqlConnect, newpsqlConnect, helpWin)
 		if response == "quit":
 			quit = True
 			break
@@ -85,7 +87,7 @@ while not connected:
 			scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Make sure all 5 fields are valid.")
 			scr.refresh()
 		elif response == "failedOldConnect":
-			scr.addstr(curses.LINES - 2, 0, "Select a database.")
+			scr.addstr(curses.LINES - 2, 0, "Problem connecting to database.")
 			scr.refresh()
 		elif isinstance(response, str):
 			# clear failed connect space
@@ -183,14 +185,14 @@ while not quit:
 			
 		# Click anywhere on Main Menu page
 		elif inTab == "Main Menu":
-			response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, newsqlConnect, newpsqlConnect, helpWin)
+			response = mainMenuClick(x, y, mainMenu, mainMenuNames, databaseInputBoxes, prevDatabasesMenu, prevConnect, prevDelete, newsqlConnect, newpsqlConnect, helpWin)
 			if response == "quit":
 				quit = True
 			elif response == "failedConnect":
 				scr.addstr(curses.LINES - 2, databaseInputBoxesX, "Must provide all 5 fields.")
 				scr.refresh()
 			elif response == "failedOldConnect":
-				scr.addstr(curses.LINES - 2, 0, "Select a database.")
+				scr.addstr(curses.LINES - 2, 0, "Problem connecting to database.")
 				scr.refresh()
 			elif isinstance(response, str):
 				# clear failed connect space
