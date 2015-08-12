@@ -17,6 +17,8 @@ def useDB(nickname):
         db.connect(connection_string)
     elif vendor == "Mysql":
         db = connect.Mysql()
+    else:
+        return False
 
     return db
 

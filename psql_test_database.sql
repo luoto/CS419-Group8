@@ -10,14 +10,25 @@ CREATE DATABASE curses;
 CREATE TABLE movies (
   id SERIAL PRIMARY KEY,
   title VARCHAR(25) NOT NULL,
-  genre VARCHAR(25)
+  genre VARCHAR(25),
+  studio_id INT references studios(id)
 );
 
-INSERT INTO movies (title, genre) VALUES
-('Deadpool', 'Action'),
-('Fantastic Four', 'Science Fiction'),
-('Dragon Ball Z', 'Fantasy'),
-('Intersteller', 'Science Fiction'),
-('Boyhood', 'Drama'),
-('Gone Girl', 'Thriller'),
-('Guardians of the Galaxy', 'Science Fiction');
+CREATE TABLE studios (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(25) NOT NULL
+);
+
+INSERT INTO studios (name) VALUES
+('Comcast'),
+('Marvel'),
+('Sony');
+
+INSERT INTO movies (title, genre, studio_id) VALUES
+('Deadpool', 'Action', 1),
+('Fantastic Four', 'Science Fiction', 1),
+('Dragon Ball Z', 'Fantasy', 2),
+('Intersteller', 'Science Fiction', 3),
+('Boyhood', 'Drama', 3),
+('Gone Girl', 'Thriller', 2),
+('Guardians of the Galaxy', 'Science Fiction', 1);
