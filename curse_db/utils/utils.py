@@ -15,10 +15,12 @@ def useDB(nickname):
 
     if vendor == "Psql":
         db = connect.Psql()
-        db.connect(connection_string)
+        if db.connect(connection_string) is False:
+            return None
     elif vendor == "Mysql":
         db = connect.Mysql()
-        db.connect(connection_string)
+        if db.connect(connection_string) is False:
+            return None
     else:
         return False
 
@@ -155,4 +157,4 @@ if __name__ == '__main__':
     # print loadDBInfo()
 
     # # deleteDBInfo('tony')
-    # print useDB('sdgsd')
+    print useDB('tony')
